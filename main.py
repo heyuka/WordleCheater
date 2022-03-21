@@ -18,24 +18,48 @@ for word in word_array:
     for letter in word:
         counts[ord(letter) - 65] += 1
 
-scores = [0] * len(word_array)
+# scores = [0] * len(word_array)
+# for i in range(len(word_array)):
+#     word = word_array[i]
+#     for letter in word:
+#         scores[i] += counts[ord(letter) - 65]
+
+counts_by_position = np.zeros((26, 5))
+for word in word_array:
+    for position, letter in enumerate(word):
+        counts_by_position[ord(letter) - 65][position] += 1
+
+medians = np.median(counts_by_position, axis=0)
+
+scores_by_pos = np.zeros((26, 5))
+for i in range(len(scores_by_pos)):
+    for j in range(len(scores_by_pos[i])):
+        scores_by_pos[i][j] = counts_by_position[i][j] / medians[j]
+
+scores = np.zeros(len(word_array))
 for i in range(len(word_array)):
     word = word_array[i]
-    for letter in word:
-        scores[i] += counts[ord(letter) - 65]
+    for position, letter in enumerate(word):
+        scores[i] += scores_by_pos[ord(letter) - 65][position]
 
 
-def find_top5(_words, _scores):
-    global word_array
-    num_to_return = -5
-    if len(_words) < 5:
-        num_to_return = (len(_words)) * -1
-    indices = np.argpartition(_scores, num_to_return)[num_to_return:]
+def get_candidates(_words, _scores):
+    num_words = 10
+    if len(_words) < 10:
+        num_words = (len(_words))
+    indices = np.argpartition(_scores, (num_words * -1))[(num_words * -1):]
+    ew = np.zeros((num_words, 2))
+    for index in range(num_words):
+        ew[index][0] = indices[index]
+        ew[index][1] = _scores[index]
+    ew = np.msort(ew)
+    for index in range(num_words):
+        indices[index] = ew[index][0]
     top5 = _words[indices]
-    return top5
+    return top5[::-1]
 
 
-def find_top5_without_duplicates():
+def get_clean_candidates():
     global word_array
     doomed = []
     for _word in word_array:
@@ -45,20 +69,18 @@ def find_top5_without_duplicates():
                 break
     _words = np.delete(word_array, doomed)
     _scores = np.delete(scores, doomed)
-    ret = find_top5(_words, _scores)
-    return ret
+    return get_candidates(_words, _scores)
 
 
 def print_status():
     global scores
     print(str(len(word_array)) + " possible words remain")
-    print("Most likely words: " + str(find_top5(word_array, scores)))
+    print("Most likely words: " + str(get_candidates(word_array, scores)))
     print("Most likely words without duplicates: " +
-          str(find_top5_without_duplicates()))
+          str(get_clean_candidates()))
 
 
 def rule_out_letter(_letter):
-    print(f"Ruling out letter {_letter}...")
     global word_array, scores
     doomed = []
     for _word in word_array:
@@ -66,11 +88,9 @@ def rule_out_letter(_letter):
             doomed.append(np.where(word_array == _word))
     word_array = np.delete(word_array, doomed)
     scores = np.delete(scores, doomed)
-    print_status()
 
 
 def require_letter(_letter):
-    print(f"Require letter {_letter}...")
     global word_array, scores
     doomed = []
     for _word in word_array:
@@ -78,11 +98,9 @@ def require_letter(_letter):
             doomed.append(np.where(word_array == _word))
     word_array = np.delete(word_array, doomed)
     scores = np.delete(scores, doomed)
-    print_status()
 
 
 def rule_out_letter_at_position(_letter, _position):
-    print(f"Rule out letter {_letter} at position {_position}...")
     global word_array, scores
     doomed = []
     for _word in word_array:
@@ -90,11 +108,9 @@ def rule_out_letter_at_position(_letter, _position):
             doomed.append(np.where(word_array == _word))
     word_array = np.delete(word_array, doomed)
     scores = np.delete(scores, doomed)
-    print_status()
 
 
 def require_letter_at_position(_letter, _position):
-    print(f"Require letter {_letter} at position {_position}...")
     global word_array, scores
     doomed = []
     for _word in word_array:
@@ -102,7 +118,6 @@ def require_letter_at_position(_letter, _position):
             doomed.append(np.where(word_array == _word))
     word_array = np.delete(word_array, doomed)
     scores = np.delete(scores, doomed)
-    print_status()
 
 
 def main_menu():
@@ -117,10 +132,9 @@ def main_menu():
     main_prompt = f'Enter a number below to make a selection from ' \
                   f'the following options:  \n' \
                   f'  0 - Quit  \n' \
-                  f'  1 - Rule out letter  \n' \
-                  f'  2 - Require letter  \n' \
-                  f'  3 - Rule out letter at position  \n' \
-                  f'  4 - Require letter at position  \n' \
+                  f'  1 - Grey Boxes  \n' \
+                  f'  2 - Yellow Boxes  \n' \
+                  f'  3 - Green Boxes  \n' \
                   f'>> '
     print_status()
     user_input = input(main_prompt)
@@ -128,73 +142,63 @@ def main_menu():
     if user_input == "0":
         quit()
     elif user_input == "1":
-        menu_rule_out_letter()
+        menu_grey_boxes()
     elif user_input == "2":
-        menu_require_letter()
+        menu_yellow_boxes()
     elif user_input == "3":
-        menu_rule_out_letter_at_position()
-    elif user_input == "4":
-        menu_require_letter_at_position()
+        menu_green_boxes()
     else:
         print("Invalid entry; please try again.")
         main_menu()
 
 
-def menu_rule_out_letter():
-    print("Rule out letter sub-menu")
-    msg = "Enter letter to rule out (blank to cancel): "
+def menu_grey_boxes():
+    msg = "Enter grey-boxed letter (blank to cancel): "
     user_input = clean_input_letter(msg)
 
     if user_input > -1:
         rule_out_letter(chr(user_input))
-        menu_rule_out_letter()
+        menu_grey_boxes()
 
     print("Returning to main menu")
     main_menu()
 
 
-def menu_require_letter():
-    print("Require letter sub-menu")
-    msg = "Enter letter to require (blank to cancel): "
-    user_input = clean_input_letter(msg)
-
-    if user_input > -1:
-        require_letter(chr(user_input))
-        menu_require_letter()
-
-    print("Returning to main menu")
-    main_menu()
-
-
-def menu_require_letter_at_position():
-    print("Require letter at position sub-menu")
-
-    msg = "Enter letter to require (blank to cancel): "
+def menu_green_boxes():
+    msg = "Enter green-boxed letter (blank to cancel): "
     user_letter = clean_input_letter(msg)
 
-    msg = "Enter position number (1 through 5): "
-    user_position = clean_input_number(msg)
+    if user_letter != -1:
+        msg = "Enter position number (1 through 5): "
+        user_position = clean_input_number(msg)
+    else:
+        user_position = -1
 
     if user_letter > -1 and user_position > -1:
-        require_letter_at_position(chr(user_letter), int(chr(user_position)) - 1)
-        menu_require_letter_at_position()
+        require_letter_at_position(chr(user_letter),
+                                   int(chr(user_position)) - 1)
+        menu_green_boxes()
 
     print("Returning to main menu")
     main_menu()
 
 
-def menu_rule_out_letter_at_position():
-    print("Rule out letter at position sub-menu")
-
-    msg = "Enter letter to rule (blank to cancel): "
+def menu_yellow_boxes():
+    msg = "Enter yellow-boxed letter (blank to cancel): "
     user_letter = clean_input_letter(msg)
 
-    msg = "Enter position number (1 through 5): "
-    user_position = clean_input_number(msg)
+    if user_letter != -1:
+        msg = "Enter yellow box position (1 through 5): "
+        user_position = clean_input_number(msg)
+    else:
+        user_position = -1
 
     if user_letter > -1 and user_position > -1:
-        rule_out_letter_at_position(chr(user_letter), int(chr(user_position)) - 1)
-        menu_rule_out_letter_at_position()
+        require_letter(chr(user_letter))
+
+        rule_out_letter_at_position(chr(user_letter),
+                                    int(chr(user_position)) - 1)
+        menu_yellow_boxes()
 
     print("Returning to main menu")
     main_menu()
@@ -207,7 +211,6 @@ def clean_input_letter(prompt):
         print("Please enter only one letter at a time.")
         clean_input_letter(prompt)
     elif len(user_input) < 1:
-        print("Returning to parent menu.")
         return -1
 
     user_input = user_input.upper()
@@ -227,7 +230,6 @@ def clean_input_number(prompt):
         print("Please enter only one number at a time.")
         clean_input_letter(prompt)
     elif len(user_input) < 1:
-        print("Returning to parent menu.")
         return -1
 
     user_input = user_input.upper()
