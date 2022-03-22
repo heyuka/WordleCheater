@@ -86,12 +86,20 @@ class Cheater:
 
     def print_status(self):
         print(str(len(self.word_array)) + " possible words remain")
-        print("Most likely:" +
-              str(get_candidates(self.word_array, self.scores)))
-        print("No doubles: " +
-              str(self.get_clean_candidates()))
-        print("New letters:" +
-              str(self.get_salty_candidates()))
+        a = get_candidates(self.word_array, self.scores)
+        b = self.get_clean_candidates()
+        c = self.get_salty_candidates()
+        d = ""
+        print(f"Most likely: {a}")
+        print(f"No doubles: {b}")
+        print(f"New letters: {c}")
+        if len(c) > 1:
+            d = c[:6]
+        elif len(b) > 1:
+            d = b[:6]
+        elif len(a) > 1:
+            d = a[:6]
+        print(f"Best guess: {d}")
 
     def rule_out_letter(self, letter):
         self.guessed.append(letter)
