@@ -1,6 +1,6 @@
 import numpy as np
 
-from CSVToList import CSVToList
+from wordlist import Wordlist
 
 
 def get_candidates(_words, _scores):
@@ -26,16 +26,16 @@ def get_candidates(_words, _scores):
 class Cheater:
     def __init__(self, filename):
         self.guessed = []
-        self.word_array = np.array(CSVToList(filename).list)
-        self.salty_words = np.copy(self.word_array)
+        self.clean_words = Wordlist(filename).wordlist
+        self.salty_words = Wordlist(filename).wordlist
 
         self.counts = np.zeros(26)
-        for word in self.word_array:
+        for word in self.clean_words:
             for letter in word:
                 self.counts[ord(letter) - 65] += 1
 
         counts_by_position = np.zeros((26, 5))
-        for word in self.word_array:
+        for word in self.clean_words:
             for position, letter in enumerate(word):
                 counts_by_position[ord(letter) - 65][position] += 1
 
@@ -46,21 +46,21 @@ class Cheater:
             for j in range(len(scores_by_pos[i])):
                 scores_by_pos[i][j] = counts_by_position[i][j] / medians[j]
 
-        self.scores = np.zeros(len(self.word_array))
-        for i in range(len(self.word_array)):
-            word = self.word_array[i]
+        self.scores = np.zeros(len(self.clean_words))
+        for i in range(len(self.clean_words)):
+            word = self.clean_words[i]
             for position, letter in enumerate(word):
                 self.scores[i] += scores_by_pos[ord(letter) - 65][position]
         self.salty_scores = np.copy(self.scores)
 
     def get_clean_candidates(self):
         doomed = []
-        for word in self.word_array:
+        for word in self.clean_words:
             for letter in word:
                 if word.count(letter) > 1:
-                    doomed.append(np.where(self.word_array == word))
+                    doomed.append(np.where(self.clean_words == word))
                     break
-        words = np.delete(self.word_array, doomed)
+        words = np.delete(self.clean_words, doomed)
         scores = np.delete(self.scores, doomed)
         return get_candidates(words, scores)
 
@@ -85,8 +85,8 @@ class Cheater:
         return get_candidates(words, scores)
 
     def print_status(self):
-        print(str(len(self.word_array)) + " possible words remain")
-        a = get_candidates(self.word_array, self.scores)
+        print(str(len(self.clean_words)) + " possible words remain")
+        a = get_candidates(self.clean_words, self.scores)
         b = self.get_clean_candidates()
         c = self.get_salty_candidates()
         d = ""
@@ -105,10 +105,10 @@ class Cheater:
         self.guessed.append(letter)
 
         doomed = []
-        for word in self.word_array:
+        for word in self.clean_words:
             if word.count(letter) > 0:
-                doomed.append(np.where(self.word_array == word))
-        self.word_array = np.delete(self.word_array, doomed)
+                doomed.append(np.where(self.clean_words == word))
+        self.clean_words = np.delete(self.clean_words, doomed)
         self.scores = np.delete(self.scores, doomed)
 
         salty_doom = []
@@ -121,20 +121,20 @@ class Cheater:
     def require_letter(self, letter):
         self.guessed.append(letter)
         doomed = []
-        for word in self.word_array:
+        for word in self.clean_words:
             if word.count(letter) == 0:
-                doomed.append(np.where(self.word_array == word))
-        self.word_array = np.delete(self.word_array, doomed)
+                doomed.append(np.where(self.clean_words == word))
+        self.clean_words = np.delete(self.clean_words, doomed)
         self.scores = np.delete(self.scores, doomed)
 
     def rule_out_letter_at_position(self, letter, position):
         self.guessed.append(letter)
 
         doomed = []
-        for word in self.word_array:
+        for word in self.clean_words:
             if word[position] == letter:
-                doomed.append(np.where(self.word_array == word))
-        self.word_array = np.delete(self.word_array, doomed)
+                doomed.append(np.where(self.clean_words == word))
+        self.clean_words = np.delete(self.clean_words, doomed)
         self.scores = np.delete(self.scores, doomed)
 
         salty_doom = []
@@ -147,8 +147,8 @@ class Cheater:
     def require_letter_at_position(self, letter, position):
         self.guessed.append(letter)
         doomed = []
-        for word in self.word_array:
+        for word in self.clean_words:
             if word[position] != letter:
-                doomed.append(np.where(self.word_array == word))
-        self.word_array = np.delete(self.word_array, doomed)
+                doomed.append(np.where(self.clean_words == word))
+        self.clean_words = np.delete(self.clean_words, doomed)
         self.scores = np.delete(self.scores, doomed)

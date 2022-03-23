@@ -2741,3 +2741,6 @@ venv/Scripts/pip3.exe
 venv/Scripts/python.exe
 venv/Scripts/pythonw.exe
 wordlist_official.csv
+*.pyc
+__pycache__/cheater.cpython-38.pyc
+__pycache__/cheater.cpython-38.pyc
