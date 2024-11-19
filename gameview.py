@@ -26,7 +26,7 @@ def check_input():
 
     if len(user_input) != 5:
         print("guess must by five letters")
-        check_input(g)
+        check_input()
 
     for letter in user_input:
         if ord(letter) < 65 or ord(letter) > 90:
