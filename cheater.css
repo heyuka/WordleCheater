@@ -1,0 +1,99 @@
+body {
+  background-color: black;
+  color: white;
+  font-family: sans-serif;
+  text-align: center;
+  margin: 0; /* Reset default body margin */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh; /* Ensure full viewport height */
+}
+h1 {
+  margin-bottom: 20px;
+}
+#startButton {
+  display: none;
+  background-color: #4caf50; /* Green */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 5px;
+}
+#startButton:hover {
+  background-color: #367c39; /* Darker green */
+}
+#mainContent {
+  display: none;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center content within mainContent */
+}
+#wordList {
+  display: none;
+  background-color: #222;
+  padding: 10px;
+  margin-top: 20px;
+  border-radius: 5px;
+  text-align: left;
+  max-width: 80%;
+}
+#wordList h2 {
+  font-size: 1.2em;
+  margin-bottom: 5px;
+}
+#wordList ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+#wordList li {
+  margin-bottom: 5px;
+}
+div {
+  margin-bottom: 10px;
+}
+button {
+  background-color: #008cba; /* Blue */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 5px;
+  margin: 5px;
+  transition: background-color 0.3s ease; /* Smooth transition */
+}
+button:hover {
+  background-color: #0056b3; /* Darker blue */
+}
+button:disabled {
+  background-color: #808080; /* Grey */
+  color: #d3d3d3;
+  cursor: not-allowed;
+  opacity: 0.6; /* Reduce opacity for better visual effect */
+  box-shadow: none; /* Remove shadow, if any */
+}
+button:disabled:hover {
+  background-color: #808080; /* Keep grey on hover when disabled */
+}
+.letterbox {
+  display: inline-block;
+  width: 50px;
+  height: 50px;
+  border: 1px solid white;
+  margin-right: 2px;
+  text-align: center;
+  line-height: 50px;
+  font-size: 24px;
+  background-color: #333;
+  border-radius: 5px;
+  cursor: pointer; /* Add a pointer cursor for better UX */
+}
+.letterbox:hover {
+  /* Add a slight shadow on hover */
+  box-shadow: 0 0 5px white;
+}
