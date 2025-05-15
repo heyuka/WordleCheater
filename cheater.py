@@ -12,7 +12,7 @@ def get_candidates(_words, _scores):
     for index in range(num_words):
         ew[index][0] = indices[index]
         ew[index][1] = _scores[index]
-    ew = np.msort(ew)
+    ew = np.sort(ew)
     for index in range(num_words):
         indices[index] = ew[index][0]
     top5 = _words[indices]
